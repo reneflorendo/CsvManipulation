@@ -1,0 +1,264 @@
+CREATE TABLE employees (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    manager_id INT,
+    salary DECIMAL(10, 2)
+);
+
+INSERT INTO employees (id, name, manager_id, salary) VALUES
+(1, 'John Doe', NULL, 75000),
+(2, 'Jane Smith', 1, 65000),
+(3, 'Emily Davis', 1, 60000),
+(4, 'Michael Brown', 2, 55000),
+(5, 'Chris Johnson', 2, 50000);
+
+WITH DirectReports AS (
+    SELECT
+        id,
+        name,
+        manager_id,
+        salary
+    FROM
+        employees
+    WHERE
+        manager_id = 1  -- Change this to the desired manager's ID
+)
+SELECT
+    *
+FROM
+    DirectReports;
+
+
+	WITH DirectReports AS (
+    SELECT
+        id,
+        name,
+        manager_id,
+        salary
+    FROM
+        employees
+    WHERE
+        manager_id = 1  -- Change this to the desired manager's ID
+)
+SELECT
+    manager_id,
+    SUM(salary) AS total_salary
+FROM
+    DirectReports
+GROUP BY
+    manager_id;
+
+
+
+	WITH RECURSIVE EmployeeHierarchy AS (
+    -- Anchor member: Select the manager's direct reports
+    SELECT
+        id,
+        name,
+        manager_id,
+        salary
+    FROM
+        employees
+    WHERE
+        manager_id = 1  -- Change this to the desired manager's ID
+
+    UNION ALL
+
+    -- Recursive member: Select employees reporting to the direct reports
+    SELECT
+        e.id,
+        e.name,
+        e.manager_id,
+        e.salary
+    FROM
+        employees e
+        INNER JOIN EmployeeHierarchy eh ON e.manager_id = eh.id
+)
+SELECT
+    *
+FROM
+    EmployeeHierarchy;
+
+---------------------------
+CREATE PROCEDURE GetEmployeesByManager
+    @ManagerID INT
+AS
+BEGIN
+    -- Declare variables for total salary calculation
+    DECLARE @TotalSalary DECIMAL(10, 2);
+
+    -- Use a CTE to get direct reports
+    WITH DirectReports AS (
+        SELECT
+            id,
+            name,
+            manager_id,
+            salary
+        FROM
+            employees
+        WHERE
+            manager_id = @ManagerID
+    )
+    -- Select all direct reports
+    SELECT
+        id,
+        name,
+        manager_id,
+        salary
+    FROM
+        DirectReports;
+
+    -- Calculate the total salary of the direct reports
+    SELECT
+        @TotalSalary = SUM(salary)
+    FROM
+        DirectReports;
+
+    -- Return the total salary
+    SELECT
+        @TotalSalary AS TotalSalary;
+END;
+------------------------------
+CREATE FUNCTION GetTotalSalaryByManager (@ManagerID INT)
+RETURNS DECIMAL(10, 2)
+AS
+BEGIN
+    DECLARE @TotalSalary DECIMAL(10, 2);
+
+    -- Calculate the total salary using a CTE for direct reports
+    WITH DirectReports AS (
+        SELECT
+            salary
+        FROM
+            employees
+        WHERE
+            manager_id = @ManagerID
+    )
+    SELECT
+        @TotalSalary = SUM(salary)
+    FROM
+        DirectReports;
+
+    RETURN @TotalSalary;
+END;
+
+--------------------------
+CREATE FUNCTION GetEmployeesByManager (@ManagerID INT)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT
+        id,
+        name,
+        manager_id,
+        salary
+    FROM
+        employees
+    WHERE
+        manager_id = @ManagerID
+);
+------------------------------
+CREATE VIEW EmployeeDetails AS
+SELECT
+    e.id AS EmployeeID,
+    e.name AS EmployeeName,
+    e.manager_id AS ManagerID,
+    m.name AS ManagerName,
+    e.salary AS Salary
+FROM
+    employees e
+LEFT JOIN
+    employees m ON e.manager_id = m.id;
+
+----------------------------
+create table renesample(
+id int identity(1,1) primary key not null,
+firstname varchar(100),
+lastname varchar(100)
+)
+
+create nonclustered index IX_firstname1 on renesample (firstname)
+create clustered index IX_id on  renesample(id)
+
+select id,FirstName, LastName from users
+select max(id),FirstName, LastName from users
+
+group by FirstName,LastName
+---------------------------------------------------
+alTER procedure rene(
+@name as varchar)
+as
+begin
+
+ CREATE TABLE ##temp_table (
+    ID INT,
+    Name VARCHAR(255)
+);
+ insert into ##temp_table(id, name) values(1,'rene')
+
+ --drop table #temp_table
+end
+
+exec rene'ssss'
+
+create trigger rene_trigger
+on Users
+AFter insert
+as 
+begin
+   select id  from Users
+end
+
+insert into users (UserName, FirstName, LastName) values('sss','sss','ss')
+
+alter function rene_func(@fname varchar(10), @lname varchar(10))
+returns varchar(10)
+
+as
+begin
+   declare @fullname as varchar(20)
+   set @fullname= CONCAT(@fname, @lname)
+  return @fullname
+end
+
+
+select *, dbo.rene_func(firstname, lastname) from Users where dbo.rene_func(firstname, lastname)='TessaFlore'
+
+update Users set FirstName=dbo.rene_func(firstname, lastname) where id=3Users
+insert into Users (UserName, FirstName, LastName) values('vvvv',dbo.rene_func('ssss', 'ssss'),'vvv')
+
+insert into Users(UserName, FirstName, LastName) values('vvvv','ssss','vvv')
+
+
+
+select * from Users 
+
+
+select FirstName, rnk from (
+select  FirstName, ROW_NUMBER() Over( order by firstname desc)  as rnk from Users
+) x where x.rnk=7
+
+select top 1 * from (
+select  FirstName from Users order by FirstName desc
+) x
+
+select * from (
+select firstname,lastname, ROW_NUMBER() Over(order by firstname, lastname asc) as rnk   from Users
+) x where x.rnk=7
+
+select  firstname, fnamerank from(
+select Id, FirstName, LastName, fnamerank=Dense_rank() Over( order by firstname asc) from Users)
+as x group by fnamerank,FirstName having count(fnamerank) > 1
+--delete from users where dbo.rene_func(firstname, lastname)='aqaq'
+
+delete from COncerts
+
+
+
+
+create table sample2(
+id int identity(1,1) primary key not NULL,
+name varchar(100) NULL)
+
+-----------------------------------------------------
